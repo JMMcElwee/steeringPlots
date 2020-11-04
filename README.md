@@ -19,5 +19,5 @@ $ ./plot3weeks -c ; ./plot3weeks -d
 for the collimator and diffuser separately. 
 
 Any questions email:
-Jordan McElwee
+Jordan McElwee,
 jmmcelwee1@sheffield.ac.uk
