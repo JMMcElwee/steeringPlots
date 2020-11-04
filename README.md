@@ -14,8 +14,7 @@ $ g++ <scriptname>.cc -o <filename> $(root-config --cflags --libs)
 The top diffuser script can be run simply with the executable, whilst the barrel injectors
 have to be passed a flag for the diffuser and collimator. I.e
 
-$ ./plot3weeks -c 
-$ ./plot3weeks -d
+$ ./plot3weeks -c ; ./plot3weeks -d
 
 for the collimator and diffuser separately. 
 
