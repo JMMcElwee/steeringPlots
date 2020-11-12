@@ -92,7 +92,7 @@ int main(int argc, char *argv[]){
 
 
   
-  int avenum = 1500;
+  int avenum = 4500;
   //  int avenum = 3000;
   std::vector<float> totDataPoints, totQVec, ratioDataPoints, ratioQVec, dateVec, errorRatioVec, errorTotVec, bbDataPoints, bbQVec, errorBBVec;
   float averageTot = 0;
@@ -146,7 +146,8 @@ int main(int argc, char *argv[]){
 
   for (int i=0; i<totQ.size(); i++){
     TDatime date(2020,month.at(i),day.at(i),hour.at(i),minute.at(i),second.at(i));
-    if (date.Convert() > time6 && totQ.at(i) > 90000 && totQ.at(i) < 190000){
+    //if (date.Convert() > time6 && totQ.at(i) > 90000 && totQ.at(i) < 190000){
+    if (date.Convert() > 1594080000 && totQ.at(i) > 90000 && totQ.at(i) < 190000){
       //if (totQ.at(i) > 100000 && totQ.at(i) < 165000){  
       if (i == 0){
 	count++;
@@ -289,6 +290,7 @@ int main(int argc, char *argv[]){
   std::string printname1 = outname + "_totQ_2weeks_norm.png";
   c1.Print(printname1.c_str());
 
+  std::cout << totQVec.back() << std::endl;
   
   TCanvas c2("c2","", 850, 500);
   c2.SetGrid();
@@ -298,6 +300,8 @@ int main(int argc, char *argv[]){
   std::string printname2 = outname + "_ratioQ_2weeks_norm.png";
   c2.Print(printname2.c_str());
 
+  std::cout << ratioQVec.back() << std::endl;
+
   TCanvas c7("c7","", 850, 500);
   c7.SetGrid();
   TLegend *leg7 = new TLegend(0.75,0.8,0.9,0.9);
@@ -306,6 +310,7 @@ int main(int argc, char *argv[]){
   std::string printname7 = outname + "_bbQ_2weeks_norm.png";
   c7.Print(printname7.c_str());
 
+  std::cout << bbQVec.back() << std::endl;
 
   TCanvas c10("c10","", 850, 500);
   c10.SetGrid();
@@ -315,6 +320,8 @@ int main(int argc, char *argv[]){
   std::string printname10 = outname + "_botQ_2weeks_norm.png";
   c10.Print(printname10.c_str());
 
+  std::cout << bottomVec.back() << std::endl;
+  
   TCanvas c11("c11","", 850, 500);
   c11.SetGrid();
   TLegend *leg11 = new TLegend(0.75,0.8,0.9,0.9);
@@ -323,6 +330,8 @@ int main(int argc, char *argv[]){
   std::string printname11 = outname + "_barQ_2weeks_norm.png";
   c11.Print(printname11.c_str());
 
+  std::cout << barrelVec.back() << std::endl;
+  
   TCanvas c12("c12","", 850, 500);
   c12.SetGrid();
   TLegend *leg12 = new TLegend(0.75,0.8,0.9,0.9);
@@ -331,6 +340,8 @@ int main(int argc, char *argv[]){
   std::string printname12 = outname + "_bzyQ_2weeks_norm.png";
   c12.Print(printname12.c_str());
 
+  std::cout << bzyVec.back() << std::endl;
+  
   return 0;
   
 }

@@ -103,7 +103,7 @@ int main(int argc, char *argv[]){
     extract_data(file,totQ,spotQ,month,day,hour,minute,second);
     
     //    int avenum = 3000;
-    int avenum = 1500;
+    int avenum = 4500;
     std::vector<float> totDataPoints, totQVec, spotDataPoints, spotQVec, dateVec, errorSpotVec, errorTotVec;
     float averageTot = 0;
     float averageSpot = 0;
@@ -139,7 +139,8 @@ int main(int argc, char *argv[]){
     
     for (int i=0; i<totQ.size(); i++){
       TDatime date(2020,month.at(i),day.at(i),hour.at(i),minute.at(i),second.at(i));
-      if (date.Convert() > time2){
+      //      if (date.Convert() > time2){
+      if (date.Convert() > 1594080000){
 	if (i == 0){
 	  count++;
 	  
