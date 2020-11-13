@@ -1,5 +1,8 @@
 # steeringPlots
 
+The develop branch is currently in a working state, being developed to have a single 
+executable to run all the files. This is working, but many features are yet to be included. 
+
 These plotting scripts can be used to create the plots used for the SK Steering Meetings. 
 In order to run the scripts, you need ROOT6, and on sukap a version can be found in my 
 software directory and setup via:
@@ -9,14 +12,12 @@ $ source /home/jmcelwee/software/root6/root/bin/thisroot.sh
 To compile the scripts, they need to find the ROOT flags and libraries and compiled with 
 g++: 
 
-$ g++ <scriptname>.cc -o <filename> $(root-config --cflags --libs)
+$ g++ \*.cc -o \<executable\> $(root-config --cflags --libs)
   
-The top diffuser script can be run simply with the executable, whilst the barrel injectors
-have to be passed a flag for the diffuser and collimator. I.e
+This can be run easily by just running the executable. For example: 
+$ ./steeringPlots
 
-$ ./plot3weeks -c ; ./plot3weeks -d
-
-for the collimator and diffuser separately. 
+will run all the files. 
 
 Any questions email:
 Jordan McElwee,
