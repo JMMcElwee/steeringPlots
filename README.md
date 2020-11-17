@@ -9,15 +9,20 @@ $ source /home/jmcelwee/software/root6/root/bin/thisroot.sh
 To compile the scripts, they need to find the ROOT flags and libraries and compiled with 
 g++: 
 
-$ g++ <scriptname>.cc -o <filename> $(root-config --cflags --libs)
-  
-The top diffuser script can be run simply with the executable, whilst the barrel injectors
-have to be passed a flag for the diffuser and collimator. I.e
+$ g++ scripts/\*.cc -o \<executable\> $(root-config --cflags --libs)
 
-$ ./plot3weeks -c ; ./plot3weeks -d
+All the plots can be created with the executable. Usually the monitor plots aren't worth
+showing as the monitor is near saturation. So simply:
 
-for the collimator and diffuser separately. 
+$ ./\<executable\>
 
 Any questions email:
 Jordan McElwee,
 jmmcelwee1@sheffield.ac.uk
+
+
+--- DEVELOP ---
+I'm working on putting in flags to run the collimator, diffuser and top diffuser
+separately, along with choosing between running the plots over 3 weeks or all time.
+If you have any other suggestions on what you'd like to see here to make it easier
+to use please let me know.
