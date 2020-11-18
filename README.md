@@ -1,8 +1,5 @@
 # steeringPlots
 
-The develop branch is currently in a working state, being developed to have a single 
-executable to run all the files. This is working, but many features are yet to be included. 
-
 These plotting scripts can be used to create the plots used for the SK Steering Meetings. 
 In order to run the scripts, you need ROOT6, and on sukap a version can be found in my 
 software directory and setup via:
@@ -12,21 +9,16 @@ $ source /home/jmcelwee/software/root6/root/bin/thisroot.sh
 To compile the scripts, they need to find the ROOT flags and libraries and compiled with 
 g++: 
 
-<<<<<<< HEAD
 $ g++ scripts/\*.cc -o \<executable\> $(root-config --cflags --libs)
 
-All the plots can be created with the executable. Usually the monitor plots aren't worth
-showing as the monitor is near saturation. So simply:
-
-$ ./\<executable\>
-=======
-$ g++ \*.cc -o \<executable\> $(root-config --cflags --libs)
-  
-This can be run easily by just running the executable. For example:
+All the plots can be created with this single executable. Usually the monitor PMT plots aren't 
+worth showing as the monitor is near saturation, so I haven't included these as default (though
+they can be accessed). So simply:
 
 $ ./\<executable\>
 
-will run all the plots since pre Gd-loading. If you want plots for x number of weeks, you can run the executable with the -w flag:
+will run all the plots since pre Gd-loading. If you want plots for x number of weeks, you can run 
+the executable with the -w flag and specify the number of weeks:
 
 $ ./\<executable\> -w \<x\>
 
