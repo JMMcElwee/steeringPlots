@@ -40,41 +40,34 @@
 #include "TStyle.h"
 #include "TGraphErrors.h"
 
-void extract_data(std::ifstream &file,std::vector<int> &month,std::vector<int> &day,std::vector<int> &hour,std::vector<int> &minute,std::vector<int> &second, std::vector<double> &totQ, std::vector<double> &monQ);
-void format_plots(TGraph *graph1,TGraph *graph2,TGraph *graph3,TGraph *graph4,TGraph *graph5,TLegend *leg ,float min, float max, std::string timeform, std::string yaxis, std::string title);
+#include "pltIndiv.h"
+#include "createPlots.h"
 
-int main(int argc, char *argv[]){
 
-  std::string beamType = "dif";
+
+void monPlot(BeamType beam, int weeks, bool weekSwitch){
+
+
   int oNameSwitch = 0;
   std::string ldir = "/disk02/usr6/jmcelwee/monitoringData/plotting";
   std::string endname = "";
   std::string outname = "";
-  int opt;
-  while ((opt = getopt(argc, argv, ":dco:l:")) != -1){
-    switch (opt)
-      {
-      case 'd':
-	beamType = "dif";
-	break;
-      case 'c':
-	beamType = "col";
-	break;
-      case 'o':
-	oNameSwitch = 1;
-	outname = optarg;
-	break;
-      case 'l':
-	ldir = optarg;
-	break;
-      case ':':
-	printf("\033[1;31m[ERROR]\033[0m -%c requires an argument.\n",optopt);
-	return 0;
-      case '?':
-	printf("\033[1;33m[ERROR]\033[0m -%c is an unknown argument... just ignoring it.\n",optopt);
-	break;
-      }
-  }
+
+
+  std::string beamType = "dif";
+  switch(beam)
+    {
+    case beam_diffuser:
+      beamType = "dif";
+      break;
+    case beam_collimator:
+      beamType = "col";
+      break;
+    default:
+      std::cout << "\033[31;1m[ERROR]\033[0m No beamtype has been supplied." << std::endl;
+    };
+  
+  
   
   std::vector<std::string> fileList;
   for (int inj=0; inj<5;inj++){
@@ -98,12 +91,17 @@ int main(int argc, char *argv[]){
   
   for (int inj=0; inj<5;inj++){
     std::vector<int> run, subrun, year, month, day, hour, minute, second;
-    std::vector<double> monQ, normQ,totQ;
+    std::vector<float> monQ, normQ, totQ, spotQ;
     std::ifstream file(fileList[inj]);
     std::cout << fileList[inj] << std::endl;
-    extract_data(file,month,day,hour,minute,second,totQ,monQ);
-    
-    int avenum = 3000;
+    extract_data(file,month,day,hour,minute,second,totQ,spotQ,monQ);
+
+
+    int avenum = 4500;
+    if (weekSwitch){
+      avenum = 400*weeks;
+    }
+
     std::vector<float> dateVec;
     std::vector<float> monDataPoints, monQVec, errorMonVec;
     std::vector<float> normDataPoints, normQVec, errorNormVec;
@@ -111,11 +109,13 @@ int main(int argc, char *argv[]){
     float averageMon = 0;
     int count = 0;
     float errorMon, errorNorm;
+
+    int time = 1594080000;
+    if (weekSwitch){
+      time = timer - 604800*weeks;
+    }
     
-    int time = timer - 3*604800;
-
     int countMon = 0;
-
     
     for (int i=0; i<monQ.size(); i++){
       TDatime date(2020,month.at(i),day.at(i),hour.at(i),minute.at(i),second.at(i));
@@ -203,10 +203,16 @@ int main(int argc, char *argv[]){
   
 
 
-  if (oNameSwitch == 0) outname = "" + beamType;
-  std::string tempNameMon = "Mon Q (" + beamType + ") ";
-  std::string tempNameNorm = "Norm Q (" + beamType + ") ";
+  if (oNameSwitch == 0) outname = beamType;
+  std::string tempNameMon = "Mon Q (" + beamType + ") Since Gd";
+  std::string tempNameNorm = "Norm Q (" + beamType + ") Since Gd";
+  std::string ending = "_preGd";
   
+  if (weekSwitch){
+    tempNameMon = "Mon Q (" + beamType + ") " + std::to_string(weeks) + " Weeks";
+    tempNameNorm = "Norm Q (" + beamType + ") " + std::to_string(weeks) + " Weeks";
+    ending = "_" + std::to_string(weeks) + "weeks";
+  }
 
   TCanvas c7("c7","");
   c7.SetGrid();
@@ -216,8 +222,8 @@ int main(int argc, char *argv[]){
   TGraphErrors *monQ3 = new TGraphErrors(dateVecVec[2].size(), &dateVecVec[2][0], &monQVecVec[2][0], 0, &errorMonVecVec[2][0]);
   TGraphErrors *monQ4 = new TGraphErrors(dateVecVec[3].size(), &dateVecVec[3][0], &monQVecVec[3][0], 0, &errorMonVecVec[3][0]);
   TGraphErrors *monQ5 = new TGraphErrors(dateVecVec[4].size(), &dateVecVec[4][0], &monQVecVec[4][0], 0, &errorMonVecVec[4][0]);
-  format_plots(monQ1, monQ2, monQ3, monQ4, monQ5,leg7, 2870, 2970, "%m-%d","Mon Q",tempNameMon+" 2 Months");
-  std::string printname7 = outname + "_monQ_2weeks.png";
+  format_plots(monQ1, monQ2, monQ3, monQ4, monQ5,leg7, 2870, 2970, "%m-%d","Mon Q",tempNameMon);
+  std::string printname7 = "plots/" + outname + ending + "_monQ.png";
   c7.Print(printname7.c_str());
   
   TCanvas c1("c1","");
@@ -228,88 +234,9 @@ int main(int argc, char *argv[]){
   TGraphErrors *normQ3 = new TGraphErrors(dateVecVec[2].size(), &dateVecVec[2][0], &normQVecVec[2][0], 0, &errorNormVecVec[2][0]);
   TGraphErrors *normQ4 = new TGraphErrors(dateVecVec[3].size(), &dateVecVec[3][0], &normQVecVec[3][0], 0, &errorNormVecVec[3][0]);
   TGraphErrors *normQ5 = new TGraphErrors(dateVecVec[4].size(), &dateVecVec[4][0], &normQVecVec[4][0], 0, &errorNormVecVec[4][0]);
-  format_plots(normQ1, normQ2, normQ3, normQ4, normQ5,leg1, 0, 0.3, "%m-%d","Norm Q",tempNameNorm+" 2 Months");
-  std::string printname1 = outname + "_normQ_2weeks.png";
+  format_plots(normQ1, normQ2, normQ3, normQ4, normQ5,leg1, 0, 0.3, "%m-%d","Norm Q",tempNameNorm);
+  std::string printname1 = "plots/" + outname + ending + "_normQ.png";
   c1.Print(printname1.c_str());
   
-  return 0;
-}
 
-
-
-
-void extract_data(std::ifstream &file,std::vector<int> &month,std::vector<int> &day,std::vector<int> &hour,std::vector<int> &minute,std::vector<int> &second,std::vector<double> &totQ,std::vector<double> &monQ){
-
-  std::string line;
-  getline(file,line);
-
-  while(getline(file, line)){
-    std::stringstream line_stream(line);
-    std::string entry;
-    std::vector<std::string> entries;
-    char delim = ' ';
-    while(getline(line_stream, entry, delim)){
-      entries.push_back(entry);
-    }
-    month.push_back(std::stoi(entries.at(3)));
-    day.push_back(std::stoi(entries.at(4)));
-    hour.push_back(std::stoi(entries.at(5)));
-    minute.push_back(std::stoi(entries.at(6)));
-    second.push_back(std::stoi(entries.at(7)));
-    totQ.push_back(std::stof(entries.at(10)));
-    //spotQ.push_back(std::stof(entries.at(11)));
-    monQ.push_back(std::stod(entries.back()));
-  }
-}
-
-
-void format_plots(TGraph *graph1,TGraph *graph2,TGraph *graph3,TGraph *graph4,TGraph *graph5, TLegend *leg,float min, float max, std::string timeform, std::string yaxis, std::string title){
-
-  TDatime now;
-
-  title = title + "(" + now.GetDate() + ")";
-  
-  graph1->SetMarkerStyle(20);
-  graph2->SetMarkerStyle(20);
-  graph3->SetMarkerStyle(20);
-  graph4->SetMarkerStyle(20);
-  graph5->SetMarkerStyle(20);
-  graph1->SetMarkerColor(2);
-  graph1->SetLineColor(2);
-  graph2->SetMarkerColor(3);
-  graph2->SetLineColor(3);
-  graph3->SetMarkerColor(4);
-  graph3->SetLineColor(4);
-  graph4->SetMarkerColor(6);
-  graph4->SetLineColor(6);
-  graph5->SetMarkerColor(7);
-  graph5->SetLineColor(7);
-  graph1->SetMarkerSize(0.4);
-  graph2->SetMarkerSize(0.4);
-  graph3->SetMarkerSize(0.4);
-  graph4->SetMarkerSize(0.4);
-  graph5->SetMarkerSize(0.4);
-  graph1->Draw("aZpsame");
-  graph1->SetFillColor(0);
-  graph1->GetYaxis()->SetTitle(yaxis.c_str());
-  graph1->SetTitle(title.c_str());
-  graph1->GetYaxis()->SetRangeUser(min,max);
-  graph2->Draw("Zpsame");
-  graph3->Draw("Zpsame");
-  graph4->Draw("Zpsame");
-  graph5->Draw("Zpsame");
-  graph1->GetXaxis()->SetTimeDisplay(1);
-  graph1->GetXaxis()->SetTimeFormat(timeform.c_str());
-  graph1->GetXaxis()->SetTimeOffset(0,"jst");
-
-  leg->SetBorderSize(0);
-  leg->SetNColumns(5);
-  leg->SetFillColor(0);
-  leg->AddEntry(graph1, "B1", "p" );
-  leg->AddEntry(graph2, "B2", "p" );
-  leg->AddEntry(graph3, "B3", "p" );
-  leg->AddEntry(graph4, "B4", "p" );
-  leg->AddEntry(graph5, "B5", "p" );
-  leg->Draw();
-  
 }

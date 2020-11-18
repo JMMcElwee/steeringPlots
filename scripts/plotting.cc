@@ -28,6 +28,7 @@
 #include <time.h>
 #include <algorithm>
 #include <typeinfo>
+
 #include "TFile.h"
 #include "TTree.h"
 #include "TCanvas.h"
@@ -39,31 +40,45 @@
 #include "TStyle.h"
 #include "TGraphErrors.h"
 #include "TTimeStamp.h"
+
 #include "pltIndiv.h"
 
 
 
 int main(int argc, char *argv[]){
 
-  std::string beamType = "dif";
+
+  BeamType beam = beam_all;
   int oNameSwitch = 0;
   std::string ldir = "/disk02/usr6/jmcelwee/monitoringData/plotting";
   std::string endname = "";
   std::string outname = "";
+  int weeks = 3;
+  bool weekSwitch = false;
   int opt;
 
-  while ((opt = getopt(argc, argv, ":dco:l:")) != -1){
+  while ((opt = getopt(argc, argv, ":dctmo:w:l:")) != -1){
     switch (opt)
       {
       case 'd':
-	beamType = "dif";
+	beam = beam_diffuser;
 	break;
       case 'c':
-	beamType = "col";
+	beam = beam_collimator;
+	break;
+      case 't':
+	beam = beam_top_diffuser;
+	break;
+      case 'm':
+	beam = beam_monitor;
 	break;
       case 'o':
 	oNameSwitch = 1;
 	outname = optarg;
+	break;
+      case 'w':
+	weekSwitch = true;
+	weeks = std::stoi(optarg);
 	break;
       case 'l':
 	ldir = optarg;
@@ -83,11 +98,30 @@ int main(int argc, char *argv[]){
   gStyle->SetCanvasColor(0);
   gStyle->SetTitleColor(0);
   gStyle->SetOptStat(0);  
-
   
-  plotUK("dif");
-  plotUK("col");
-  topDiff();
+
+  switch(beam)
+    {
+    case beam_diffuser:
+      plotUK(beam_diffuser,weeks,weekSwitch);
+      break;
+    case beam_collimator:
+      plotUK(beam_collimator,weeks,weekSwitch);
+      break;
+    case beam_top_diffuser:
+      topDiff(weeks,weekSwitch);
+      break;
+    case beam_monitor:
+      monPlot(beam_diffuser,weeks,weekSwitch);
+      monPlot(beam_collimator,weeks,weekSwitch);
+      break;
+    default:
+      plotUK(beam_diffuser,weeks,weekSwitch);
+      plotUK(beam_collimator,weeks,weekSwitch);
+      topDiff(weeks,weekSwitch);
+      break;
+    };
+  
   
   return 0;
 }
