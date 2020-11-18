@@ -28,6 +28,7 @@
 #include <time.h>
 #include <algorithm>
 #include <typeinfo>
+
 #include "TFile.h"
 #include "TTree.h"
 #include "TCanvas.h"
@@ -39,37 +40,16 @@
 #include "TStyle.h"
 #include "TGraphErrors.h"
 
-void extract_data(std::ifstream &file, std::vector<double> &totQ,std::vector<double> &barrelQ,std::vector<int> &month,std::vector<int> &day,std::vector<int> &hour,std::vector<int> &minute,std::vector<int> &second,std::vector<double> &bottomQ,std::vector<double> &bz0y0Q);
-void format_plots(TGraph *graph1,TLegend *leg ,float min, float max, std::string timeform, std::string yaxis, std::string title);
-void format_plots_multi(TGraph *graph1, TGraph *graph2, TLegend *leg,float min, float max, std::string timeform, std::string yaxis, std::string title);
+#include "createPlots.h"
 
-int main(int argc, char *argv[]){
+
+void topDiff(int weeks, bool weekSwitch){
 
   
   int oNameSwitch = 0;
   std::string ldir = "/disk02/usr6/jmcelwee/monitoringData/plotting";
   std::string endname = "";
   std::string outname = "";
-  int opt;
-  while ((opt = getopt(argc, argv, ":o:l:")) != -1){
-    switch (opt)
-      {
-      case 'o':
-	oNameSwitch = 1;
-	outname = optarg;
-	break;
-      case 'l':
-	ldir = optarg;
-	break;
-      case ':':
-	printf("\033[1;31m[ERROR]\033[0m -%c requires an argument.\n",optopt);
-	return 0;
-      case '?':
-	printf("\033[1;33m[ERROR]\033[0m -%c is an unknown argument... just ignoring it.\n",optopt);
-	break;
-      }
-  }
-
 
   std::string fileEx = ldir + "/top_diffuser.dat";
   std::cout << fileEx << std::endl;
@@ -88,23 +68,28 @@ int main(int argc, char *argv[]){
   std::vector<int> run, subrun, year, month, day, hour, minute, second;
   std::vector<double> totQ, barrelQ, bottomQ, bz0y0Q;
   std::ifstream file(fileEx);
-  extract_data(file,totQ,barrelQ,month,day,hour,minute,second,bottomQ,bz0y0Q);
+  extract_data_top(file,totQ,barrelQ,month,day,hour,minute,second,bottomQ,bz0y0Q);
 
 
   
   int avenum = 4500;
-  //  int avenum = 3000;
+  if (weekSwitch){
+    avenum = weeks*400;
+  }
+
+  
   std::vector<float> totDataPoints, totQVec, ratioDataPoints, ratioQVec, dateVec, errorRatioVec, errorTotVec, bbDataPoints, bbQVec, errorBBVec;
   float averageTot = 0;
   float averageRatio = 0;
   float averageBB = 0;
   int count = 0;
 
+  int time = 1594080000;
+  if (weekSwitch){
+    time = timer - weeks*604800;
+  }
 
-  
-  //  int time6 = timer -6000000;
-  //int time6 = timer - 7377634;
-  int time6 = timer - 3*604800;
+
   std::vector<float> barrelDataPoints, barrelVec, errorBarVec;
   std::vector<float> bottomDataPoints, bottomVec, errorBotVec;
   std::vector<float> bzyDataPoints, bzyVec, errorBzyVec;
@@ -146,9 +131,7 @@ int main(int argc, char *argv[]){
 
   for (int i=0; i<totQ.size(); i++){
     TDatime date(2020,month.at(i),day.at(i),hour.at(i),minute.at(i),second.at(i));
-    //if (date.Convert() > time6 && totQ.at(i) > 90000 && totQ.at(i) < 190000){
-    if (date.Convert() > 1594080000 && totQ.at(i) > 90000 && totQ.at(i) < 190000){
-      //if (totQ.at(i) > 100000 && totQ.at(i) < 165000){  
+    if (date.Convert() > time && totQ.at(i) > 90000 && totQ.at(i) < 190000){
       if (i == 0){
 	count++;
 	averageTot += totQ.at(i);
@@ -281,13 +264,27 @@ int main(int argc, char *argv[]){
   std::string tempNameBot = "Normalised Bottom Q ";
   std::string tempNameBar = "Normalised Barrel Q ";
   std::string tempNameBzy = "Normalised Barrel Q (z&y > 0) ";
+  std::string ending = "_preGd";
+
+  
+  if (weekSwitch){
+    tempNameTot = "Total Q (top diffuser)";
+    tempNameRatio = "Charge Ratio (top diffuser) ";
+    tempNameBB = "Charge Ratio (top diffuser - z&y > 0) ";
+    tempNameBot = "Normalised Bottom Q ";
+    tempNameBar = "Normalised Barrel Q ";
+    tempNameBzy = "Normalised Barrel Q (z&y > 0) ";
+    ending = "_" + std::to_string(weeks) + "weeks";
+  }
+  
+
   
   TCanvas c1("c1","", 850, 500);
   c1.SetGrid();
   TLegend *leg1 = new TLegend(0.13,0.85,0.9,0.9);
   TGraphErrors *totQ1 = new TGraphErrors(dateVec.size(), &dateVec[0], &totQVec[0], 0, &errorTotVec[0]);
-  format_plots(totQ1, leg1, 150000,190000, "%m-%d","Tot Q (p.e)",tempNameTot+"");
-  std::string printname1 = outname + "_totQ_2weeks_norm.png";
+  format_plots_top(totQ1, leg1, 150000,190000, "%m-%d","Tot Q (p.e)",tempNameTot+"");
+  std::string printname1 = "plots/" + outname + ending + "_totQ_norm.png";
   c1.Print(printname1.c_str());
 
   std::cout << totQVec.back() << std::endl;
@@ -296,8 +293,8 @@ int main(int argc, char *argv[]){
   c2.SetGrid();
   TLegend *leg2 = new TLegend(0.75,0.8,0.9,0.9);
   TGraphErrors *ratioQ1 = new TGraphErrors(dateVec.size(), &dateVec[0], &ratioQVec[0], 0, &errorRatioVec[0]);
-  format_plots(ratioQ1, leg2, 0.985, 1.015,"%m-%d","bottomQ/barrelQ",tempNameRatio+"");
-  std::string printname2 = outname + "_ratioQ_2weeks_norm.png";
+  format_plots_top(ratioQ1, leg2, 0.985, 1.015,"%m-%d","bottomQ/barrelQ",tempNameRatio+"");
+  std::string printname2 = "plots/" +  outname + ending + "_ratioQ_norm.png";
   c2.Print(printname2.c_str());
 
   std::cout << ratioQVec.back() << std::endl;
@@ -306,8 +303,8 @@ int main(int argc, char *argv[]){
   c7.SetGrid();
   TLegend *leg7 = new TLegend(0.75,0.8,0.9,0.9);
   TGraphErrors *bbQ1 = new TGraphErrors(dateVec.size(), &dateVec[0], &bbQVec[0], 0, &errorBBVec[0]);
-  format_plots(bbQ1, leg7, 0.985, 1.015,"%m-%d","bottomQ/barrelQ",tempNameBB+"");
-  std::string printname7 = outname + "_bbQ_2weeks_norm.png";
+  format_plots_top(bbQ1, leg7, 0.985, 1.015,"%m-%d","bottomQ/barrelQ",tempNameBB+"");
+  std::string printname7 = "plots/" + outname + ending + "_bbQ_norm.png";
   c7.Print(printname7.c_str());
 
   std::cout << bbQVec.back() << std::endl;
@@ -316,8 +313,8 @@ int main(int argc, char *argv[]){
   c10.SetGrid();
   TLegend *leg10 = new TLegend(0.75,0.8,0.9,0.9);
   TGraphErrors *botQ1 = new TGraphErrors(dateVec.size(), &dateVec[0], &bottomVec[0], 0, &errorBotVec[0]);
-  format_plots(botQ1, leg10, 0.985, 1.015,"%m-%d","bottomQ/totQ",tempNameBot+"");
-  std::string printname10 = outname + "_botQ_2weeks_norm.png";
+  format_plots_top(botQ1, leg10, 0.985, 1.015,"%m-%d","bottomQ/totQ",tempNameBot+"");
+  std::string printname10 = "plots/" + outname + ending + "_botQ_norm.png";
   c10.Print(printname10.c_str());
 
   std::cout << bottomVec.back() << std::endl;
@@ -326,8 +323,8 @@ int main(int argc, char *argv[]){
   c11.SetGrid();
   TLegend *leg11 = new TLegend(0.75,0.8,0.9,0.9);
   TGraphErrors *barQ1 = new TGraphErrors(dateVec.size(), &dateVec[0], &barrelVec[0], 0, &errorBarVec[0]);
-  format_plots(barQ1, leg11, 0.985, 1.015,"%m-%d","barrelQ/totQ",tempNameBar+"");
-  std::string printname11 = outname + "_barQ_2weeks_norm.png";
+  format_plots_top(barQ1, leg11, 0.985, 1.015,"%m-%d","barrelQ/totQ",tempNameBar+"");
+  std::string printname11 = "plots/" + outname + ending + "_barQ_norm.png";
   c11.Print(printname11.c_str());
 
   std::cout << barrelVec.back() << std::endl;
@@ -336,102 +333,12 @@ int main(int argc, char *argv[]){
   c12.SetGrid();
   TLegend *leg12 = new TLegend(0.75,0.8,0.9,0.9);
   TGraphErrors *bzyQ1 = new TGraphErrors(dateVec.size(), &dateVec[0], &bzyVec[0], 0, &errorBzyVec[0]);
-  format_plots(bzyQ1, leg12, 0.985, 1.015,"%m-%d","bz0y0Q/totQ",tempNameBzy+"");
-  std::string printname12 = outname + "_bzyQ_2weeks_norm.png";
+  format_plots_top(bzyQ1, leg12, 0.985, 1.015,"%m-%d","bz0y0Q/totQ",tempNameBzy+"");
+  std::string printname12 = "plots/" + outname + ending + "_bzyQ_norm.png";
   c12.Print(printname12.c_str());
 
   std::cout << bzyVec.back() << std::endl;
   
-  return 0;
-  
 }
 
 
-
-
-void extract_data(std::ifstream &file,std::vector<double> &totQ, std::vector<double> &barrelQ,std::vector<int> &month,std::vector<int> &day,std::vector<int> &hour,std::vector<int> &minute,std::vector<int> &second,std::vector<double> &bottomQ,std::vector<double> &bz0y0Q){
-
-  std::string line;
-  getline(file,line);
-
-  while(getline(file, line)){
-
-    std::stringstream line_stream(line);
-    std::string entry;
-    std::vector<std::string> entries;
-    char delim = ' ';
-    while(getline(line_stream, entry, delim)){
-      entries.push_back(entry);
-    }
-    month.push_back(std::stoi(entries.at(3)));
-    day.push_back(std::stoi(entries.at(4)));
-    hour.push_back(std::stoi(entries.at(5)));
-    minute.push_back(std::stoi(entries.at(6)));
-    second.push_back(std::stoi(entries.at(7)));
-    totQ.push_back(std::stod(entries.at(8)));
-    barrelQ.push_back(std::stod(entries.at(9)));
-    bz0y0Q.push_back(std::stod(entries.at(10)));
-    bottomQ.push_back(std::stod(entries.back()));
-  }
-}
-
-
-void format_plots(TGraph *graph1,TLegend *leg,float min, float max, std::string timeform, std::string yaxis, std::string title){
-
-  TDatime now;
-
-  title = title + "(" + now.GetDate() + ")";
-  
-  graph1->SetMarkerStyle(20);
-  graph1->SetMarkerColor(2);
-  graph1->SetLineColor(2);
-  graph1->SetMarkerSize(0.4);
-  graph1->Draw("aZpsame");
-  graph1->SetFillColor(0);
-  graph1->GetYaxis()->SetTitle(yaxis.c_str());
-  graph1->SetTitle(title.c_str());
-  graph1->GetYaxis()->SetRangeUser(min,max);
-  graph1->GetXaxis()->SetTimeDisplay(1);
-  graph1->GetXaxis()->SetTimeFormat(timeform.c_str());
-  graph1->GetXaxis()->SetTimeOffset(0,"jst");
-
-  leg->SetBorderSize(0);
-  leg->SetNColumns(5);
-  leg->SetFillColor(0);
-  leg->AddEntry(graph1, "B1", "p" );
-  //leg->Draw();
-  
-}
-
-
-void format_plots_multi(TGraph *graph1, TGraph *graph2, TLegend *leg,float min, float max, std::string timeform, std::string yaxis, std::string title){
-
-  TDatime now;
-
-  title = title + "(" + now.GetDate() + ")";
-  
-  graph1->SetMarkerStyle(20);
-  graph1->SetMarkerColor(2);
-  graph1->SetLineColor(2);
-  graph1->SetMarkerSize(0.4);
-  graph2->SetMarkerStyle(20);
-  graph2->SetMarkerColor(4);
-  graph2->SetLineColor(4);
-  graph2->SetMarkerSize(0.4);
-  graph1->Draw("aZpsame");
-  graph2->Draw("Zpsame");
-  graph1->SetFillColor(0);
-  graph1->GetYaxis()->SetTitle(yaxis.c_str());
-  graph1->SetTitle(title.c_str());
-  graph1->GetYaxis()->SetRangeUser(min,max);
-  graph1->GetXaxis()->SetTimeDisplay(1);
-  graph1->GetXaxis()->SetTimeFormat(timeform.c_str());
-  graph1->GetXaxis()->SetTimeOffset(0,"jst");
-
-  //leg->SetBorderSize(0);
-  leg->SetFillColor(0);
-  leg->AddEntry(graph1, "All Barrel", "p" );
-  leg->AddEntry(graph2, "z > 0 && y > 0", "p" );
-  leg->Draw();
-  
-}

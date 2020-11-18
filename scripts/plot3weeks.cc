@@ -39,42 +39,30 @@
 #include "TStyle.h"
 #include "TGraphErrors.h"
 #include "TTimeStamp.h"
+#include "pltIndiv.h"
+#include "createPlots.h"
 
-void extract_data(std::ifstream &file, std::vector<float> &totQ,std::vector<float> &spotQ,std::vector<int> &month,std::vector<int> &day,std::vector<int> &hour,std::vector<int> &minute,std::vector<int> &second);
-void format_plots(TGraph *graph1,TGraph *graph2,TGraph *graph3,TGraph *graph4,TGraph *graph5,TLegend *leg ,float min, float max, std::string timeform, std::string yaxis, std::string title);
+void plotUK(BeamType beam, int weeks, bool weekSwitch){
 
-int main(int argc, char *argv[]){
-
-  std::string beamType = "dif";
   int oNameSwitch = 0;
   std::string ldir = "/disk02/usr6/jmcelwee/monitoringData/plotting";
   std::string endname = "";
   std::string outname = "";
-  int opt;
-  while ((opt = getopt(argc, argv, ":dco:l:")) != -1){
-    switch (opt)
-      {
-      case 'd':
-	beamType = "dif";
-	break;
-      case 'c':
-	beamType = "col";
-	break;
-      case 'o':
-	oNameSwitch = 1;
-	outname = optarg;
-	break;
-      case 'l':
-	ldir = optarg;
-	break;
-      case ':':
-	printf("\033[1;31m[ERROR]\033[0m -%c requires an argument.\n",optopt);
-	return 0;
-      case '?':
-	printf("\033[1;33m[ERROR]\033[0m -%c is an unknown argument... just ignoring it.\n",optopt);
-	break;
-      }
-  }
+
+
+  std::string beamType = "dif";
+  switch(beam)
+    {
+    case beam_diffuser:
+      beamType = "dif";
+      break;
+    case beam_collimator:
+      beamType = "col";
+      break;
+    default:
+      std::cout << "\033[31;1m[ERROR]\033[0m No beamtype has been supplied." << std::endl;
+    };
+  
   
   std::vector<std::string> fileList;
   for (int inj=0; inj<5;inj++){
@@ -97,21 +85,25 @@ int main(int argc, char *argv[]){
   
   for (int inj=0; inj<5;inj++){
     std::vector<int> run, subrun, year, month, day, hour, minute, second;
-    std::vector<float> totQ, spotQ;
+    std::vector<float> totQ, spotQ, monQ;
     std::ifstream file(fileList[inj]);
     std::cout << fileList[inj] << std::endl;
-    extract_data(file,totQ,spotQ,month,day,hour,minute,second);
+    extract_data(file,month,day,hour,minute,second,totQ,spotQ,monQ);
     
-    //    int avenum = 3000;
     int avenum = 4500;
+    if (weekSwitch){
+      avenum = weeks*400;
+    }
     std::vector<float> totDataPoints, totQVec, spotDataPoints, spotQVec, dateVec, errorSpotVec, errorTotVec;
     float averageTot = 0;
     float averageSpot = 0;
     int count = 0;
 
     
-    //int time2 = timer - 7377634;
-    int time2 = timer - 3*604800;
+    int time = 1594080000;
+    if (weekSwitch){
+      time = timer - weeks*604800;
+    }
     float errorTot,errorSpot;
 
     int normCount = 0;
@@ -139,8 +131,7 @@ int main(int argc, char *argv[]){
     
     for (int i=0; i<totQ.size(); i++){
       TDatime date(2020,month.at(i),day.at(i),hour.at(i),minute.at(i),second.at(i));
-      //      if (date.Convert() > time2){
-      if (date.Convert() > 1594080000){
+      if (date.Convert() > time){
 	if (i == 0){
 	  count++;
 	  
@@ -212,9 +203,17 @@ int main(int argc, char *argv[]){
   
 
 
-  if (oNameSwitch == 0) outname = "" + beamType;
-  std::string tempNameTot = "Total Q (" + beamType + ") ";
-  std::string tempNameSpot = "Spot Q (" + beamType + ") ";
+  if (oNameSwitch == 0) outname = beamType;
+  std::string tempNameTot = "Total Q (" + beamType + ") Since Gd";
+  std::string tempNameSpot = "Spot Q (" + beamType + ") Since Gd";
+  std::string ending = "_preGd";
+  
+  if (weekSwitch){
+    tempNameTot = "Total Q (" + beamType + ") " + std::to_string(weeks) + " Weeks";
+    tempNameSpot = "Spot Q (" + beamType + ") " + std::to_string(weeks) + " Weeks";
+    ending = "_" + std::to_string(weeks) + "weeks";
+  }
+
   
   TCanvas c1("c1","");
   c1.SetGrid();
@@ -224,8 +223,8 @@ int main(int argc, char *argv[]){
   TGraphErrors *totQ3 = new TGraphErrors(dateVecVec[2].size(), &dateVecVec[2][0], &totQVecVec[2][0], 0, &errorTotVecVec[2][0]);
   TGraphErrors *totQ4 = new TGraphErrors(dateVecVec[3].size(), &dateVecVec[3][0], &totQVecVec[3][0], 0, &errorTotVecVec[3][0]);
   TGraphErrors *totQ5 = new TGraphErrors(dateVecVec[4].size(), &dateVecVec[4][0], &totQVecVec[4][0], 0, &errorTotVecVec[4][0]);
-  format_plots(totQ1, totQ2, totQ3, totQ4, totQ5,leg1, 0.25, 1.4, "%m-%d","Tot Q (p.e)",tempNameTot+" ");
-  std::string printname1 = outname + "_totQ_2weeks_norm.png";
+  format_plots(totQ1, totQ2, totQ3, totQ4, totQ5,leg1, 0.25, 1.4, "%m-%d","Tot Q (p.e)",tempNameTot);
+  std::string printname1 = "plots/" + outname + ending + "_totQ_norm.png";
   c1.Print(printname1.c_str());
   
   
@@ -234,89 +233,12 @@ int main(int argc, char *argv[]){
   TLegend *leg2 = new TLegend(0.13,0.85,0.9,0.9);
   TGraphErrors *spotQ1 = new TGraphErrors(dateVecVec[0].size(), &dateVecVec[0][0], &spotQVecVec[0][0], 0, &errorSpotVecVec[0][0]);
   TGraphErrors *spotQ2 = new TGraphErrors(dateVecVec[1].size(), &dateVecVec[1][0], &spotQVecVec[1][0], 0, &errorSpotVecVec[1][0]);
-  TGraphErrors *spotQ3 = new TGraphErrors(dateVecVec[2].size(), &dateVecVec[2][0], &spotQVecVec[2][0], 0, &errorSpotVecVec[2][0]);
+ TGraphErrors *spotQ3 = new TGraphErrors(dateVecVec[2].size(), &dateVecVec[2][0], &spotQVecVec[2][0], 0, &errorSpotVecVec[2][0]);
   TGraphErrors *spotQ4 = new TGraphErrors(dateVecVec[3].size(), &dateVecVec[3][0], &spotQVecVec[3][0], 0, &errorSpotVecVec[3][0]);
   TGraphErrors *spotQ5 = new TGraphErrors(dateVecVec[4].size(), &dateVecVec[4][0], &spotQVecVec[4][0], 0, &errorSpotVecVec[4][0]);
-  format_plots(spotQ1, spotQ2, spotQ3, spotQ4, spotQ5,leg2, 0.25, 1.4,"%m-%d","Spot Q (p.e)",tempNameSpot+" ");
-  std::string printname2 = outname + "_spotQ_2weeks_norm.png";
+  format_plots(spotQ1, spotQ2, spotQ3, spotQ4, spotQ5,leg2, 0.25, 1.4,"%m-%d","Spot Q (p.e)",tempNameSpot);
+  std::string printname2 = "plots/" + outname + ending + "_spotQ_norm.png";
   c2.Print(printname2.c_str());
 
-  
-  return 0;
-}
-
-
-
-
-void extract_data(std::ifstream &file,std::vector<float> &totQ, std::vector<float> &spotQ,std::vector<int> &month,std::vector<int> &day,std::vector<int> &hour,std::vector<int> &minute,std::vector<int> &second){
-
-  std::string line;
-  getline(file,line);
-
-  while(getline(file, line)){
-    std::stringstream line_stream(line);
-    std::string entry;
-    std::vector<std::string> entries;
-    char delim = ' ';
-    while(getline(line_stream, entry, delim)){
-      entries.push_back(entry);
-    }
-    month.push_back(std::stoi(entries.at(3)));
-    day.push_back(std::stoi(entries.at(4)));
-    hour.push_back(std::stoi(entries.at(5)));
-    minute.push_back(std::stoi(entries.at(6)));
-    second.push_back(std::stoi(entries.at(7)));
-    totQ.push_back(std::stof(entries.at(10)));
-    spotQ.push_back(std::stof(entries.at(11)));
-    //monQ.push_back(std::stof(entries.at(12)));
-  }
-}
-
-
-void format_plots(TGraph *graph1,TGraph *graph2,TGraph *graph3,TGraph *graph4,TGraph *graph5, TLegend *leg,float min, float max, std::string timeform, std::string yaxis, std::string title){
-  
-  graph1->SetMarkerStyle(20);
-  graph2->SetMarkerStyle(20);
-  graph3->SetMarkerStyle(20);
-  graph4->SetMarkerStyle(20);
-  graph5->SetMarkerStyle(20);
-  graph1->SetMarkerColor(2);
-  graph1->SetLineColor(2);
-  graph2->SetMarkerColor(3);
-  graph2->SetLineColor(3);
-  graph3->SetMarkerColor(4);
-  graph3->SetLineColor(4);
-  graph4->SetMarkerColor(6);
-  graph4->SetLineColor(6);
-  graph5->SetMarkerColor(7);
-  graph5->SetLineColor(7);
-  graph1->SetMarkerSize(0.4);
-  graph2->SetMarkerSize(0.4);
-  graph3->SetMarkerSize(0.4);
-  graph4->SetMarkerSize(0.4);
-  graph5->SetMarkerSize(0.4);
-  graph1->Draw("aZpsame");
-  graph1->SetFillColor(0);
-  graph1->GetYaxis()->SetTitle(yaxis.c_str());
-  graph1->SetTitle(title.c_str());
-  graph1->GetYaxis()->SetRangeUser(min,max);
-  graph2->Draw("Zpsame");
-  graph3->Draw("Zpsame");
-  graph4->Draw("Zpsame");
-  graph5->Draw("Zpsame");
-  graph1->GetXaxis()->SetTimeDisplay(1);
-  graph1->GetXaxis()->SetTimeFormat(timeform.c_str());
-  graph1->GetXaxis()->SetTimeOffset(0,"jst");
-  graph1->GetXaxis()->SetNdivisions(8,kTRUE);
-  
-  leg->SetBorderSize(0);
-  leg->SetNColumns(5);
-  leg->SetFillColor(0);
-  leg->AddEntry(graph1, "B1", "p" );
-  leg->AddEntry(graph2, "B2", "p" );
-  leg->AddEntry(graph3, "B3", "p" );
-  leg->AddEntry(graph4, "B4", "p" );
-  leg->AddEntry(graph5, "B5", "p" );
-  leg->Draw();
   
 }
