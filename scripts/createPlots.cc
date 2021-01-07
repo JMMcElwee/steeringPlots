@@ -130,7 +130,7 @@ void extract_data_top(std::ifstream &file,std::vector<double> &totQ, std::vector
     while(getline(line_stream, entry, delim)){
       entries.push_back(entry);
     }
-    month.push_back(std::stoi(entries.at(2)));
+    year.push_back(std::stoi(entries.at(2)));
     month.push_back(std::stoi(entries.at(3)));
     day.push_back(std::stoi(entries.at(4)));
     hour.push_back(std::stoi(entries.at(5)));

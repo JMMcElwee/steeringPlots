@@ -140,6 +140,8 @@ void topDiff(int weeks, bool weekSwitch){
       date.Set(2020,month.at(i),day.at(i),hour.at(i),minute.at(i),second.at(i));
     }
 
+    //    std::cout << date.GetYear() << " " << date.GetMonth() << " " << date.GetDay() << " " << date.GetHour() << " " << date.GetMinute() << std::endl;
+    
     if (date.Convert() > time && totQ.at(i) > 90000 && totQ.at(i) < 190000){
       if (i == 0){
 	count++;
