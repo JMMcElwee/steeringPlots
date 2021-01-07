@@ -38,7 +38,7 @@
 #include "TDatime.h"
 
 
-void extract_data(std::ifstream &file,std::vector<int> &month,std::vector<int> &day,std::vector<int> &hour,std::vector<int> &minute,std::vector<int> &second,std::vector<float> &totQ, std::vector<float> &spotQ,std::vector<float> &monQ){
+void extract_data(std::ifstream &file,std::vector<int> &year,std::vector<int> &month,std::vector<int> &day,std::vector<int> &hour,std::vector<int> &minute,std::vector<int> &second,std::vector<float> &totQ, std::vector<float> &spotQ,std::vector<float> &monQ){
 
   std::string line;
   getline(file,line);
@@ -48,9 +48,13 @@ void extract_data(std::ifstream &file,std::vector<int> &month,std::vector<int> &
     std::string entry;
     std::vector<std::string> entries;
     char delim = ' ';
+    
     while(getline(line_stream, entry, delim)){
       entries.push_back(entry);
     }
+
+    //    std::cout << entries.at(3) << " " << entries.at(4) << " " << entries.at(5) << " " << entries.at(6) << " " << entries.at(7) << std::endl;
+    year.push_back(std::stoi(entries.at(2)));
     month.push_back(std::stoi(entries.at(3)));
     day.push_back(std::stoi(entries.at(4)));
     hour.push_back(std::stoi(entries.at(5)));
@@ -112,7 +116,7 @@ void format_plots(TGraph *graph1,TGraph *graph2,TGraph *graph3,TGraph *graph4,TG
 }
 
 
-void extract_data_top(std::ifstream &file,std::vector<double> &totQ, std::vector<double> &barrelQ,std::vector<int> &month,std::vector<int> &day,std::vector<int> &hour,std::vector<int> &minute,std::vector<int> &second,std::vector<double> &bottomQ,std::vector<double> &bz0y0Q){
+void extract_data_top(std::ifstream &file,std::vector<double> &totQ, std::vector<double> &barrelQ,std::vector<int> &year,std::vector<int> &month,std::vector<int> &day,std::vector<int> &hour,std::vector<int> &minute,std::vector<int> &second,std::vector<double> &bottomQ,std::vector<double> &bz0y0Q){
 
   std::string line;
   getline(file,line);
@@ -126,6 +130,7 @@ void extract_data_top(std::ifstream &file,std::vector<double> &totQ, std::vector
     while(getline(line_stream, entry, delim)){
       entries.push_back(entry);
     }
+    month.push_back(std::stoi(entries.at(2)));
     month.push_back(std::stoi(entries.at(3)));
     day.push_back(std::stoi(entries.at(4)));
     hour.push_back(std::stoi(entries.at(5)));
