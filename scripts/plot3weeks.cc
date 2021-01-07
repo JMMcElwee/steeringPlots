@@ -110,12 +110,14 @@ void plotUK(BeamType beam, int weeks, bool weekSwitch){
     int normCount = 0;
     float normAverageTot = 0;
     float normAverageSpot = 0;
+
     for (int i=0; i<totQ.size(); i++){
+
       TDatime date(2021,month.at(i),day.at(i),hour.at(i),minute.at(i),second.at(i));
       if (year.at(i) == 120){
-	TDatime date(2020,month.at(i),day.at(i),hour.at(i),minute.at(i),second.at(i));
+	date.Set(2020,month.at(i),day.at(i),hour.at(i),minute.at(i),second.at(i));
       }
-      
+
       
       if (date.Convert() > 1594080000 && date.Convert() < 1594864800){
 	if (totQ.at(i) < 2000){
@@ -138,10 +140,9 @@ void plotUK(BeamType beam, int weeks, bool weekSwitch){
     for (int i=0; i<totQ.size(); i++){
       TDatime date(2021,month.at(i),day.at(i),hour.at(i),minute.at(i),second.at(i));
       if (year.at(i) == 120){
-	TDatime date(2020,month.at(i),day.at(i),hour.at(i),minute.at(i),second.at(i));
+	date.Set(2020,month.at(i),day.at(i),hour.at(i),minute.at(i),second.at(i));
+	//std::cout << "Hello" << std::endl;
       }
-
-
       
       if (date.Convert() > time){
 	if (i == 0){
