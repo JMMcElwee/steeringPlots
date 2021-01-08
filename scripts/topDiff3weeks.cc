@@ -68,7 +68,7 @@ void topDiff(int weeks, bool weekSwitch){
   std::vector<int> run, subrun, year, month, day, hour, minute, second;
   std::vector<double> totQ, barrelQ, bottomQ, bz0y0Q;
   std::ifstream file(fileEx);
-  extract_data_top(file,totQ,barrelQ,month,day,hour,minute,second,bottomQ,bz0y0Q);
+  extract_data_top(file,totQ,barrelQ,year,month,day,hour,minute,second,bottomQ,bz0y0Q);
 
 
   
@@ -105,9 +105,14 @@ void topDiff(int weeks, bool weekSwitch){
   float normBzy = 0;
   float normRatio = 0;
   float normBB = 0;
-  
+
+  int yearConv;
+  TDatime date;
   for (int i=0; i<totQ.size(); i++){
-    TDatime date(2020,month.at(i),day.at(i),hour.at(i),minute.at(i),second.at(i));
+    yearConv = year.at(i) + 1900;
+    date.Set(yearConv,month.at(i),day.at(i),hour.at(i),minute.at(i),second.at(i));
+    
+
     if (date.Convert() > 1594080000 && date.Convert() < 1594864800){
       normBarrel += barrelQ.at(i)/totQ.at(i);
       normBottom += bottomQ.at(i)/totQ.at(i);
@@ -130,7 +135,11 @@ void topDiff(int weeks, bool weekSwitch){
   std::cout << normBarrel << " " << normBottom << " " << normBzy << " " << normRatio << " " << normBB << std::endl;
 
   for (int i=0; i<totQ.size(); i++){
-    TDatime date(2020,month.at(i),day.at(i),hour.at(i),minute.at(i),second.at(i));
+    yearConv = year.at(i) + 1900;
+    date.Set(yearConv,month.at(i),day.at(i),hour.at(i),minute.at(i),second.at(i));
+
+    //    std::cout << date.GetYear() << " " << date.GetMonth() << " " << date.GetDay() << " " << date.GetHour() << " " << date.GetMinute() << std::endl;
+    
     if (date.Convert() > time && totQ.at(i) > 90000 && totQ.at(i) < 190000){
       if (i == 0){
 	count++;

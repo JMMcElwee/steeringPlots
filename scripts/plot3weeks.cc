@@ -88,7 +88,8 @@ void plotUK(BeamType beam, int weeks, bool weekSwitch){
     std::vector<float> totQ, spotQ, monQ;
     std::ifstream file(fileList[inj]);
     std::cout << fileList[inj] << std::endl;
-    extract_data(file,month,day,hour,minute,second,totQ,spotQ,monQ);
+    extract_data(file,year,month,day,hour,minute,second,totQ,spotQ,monQ);
+
     
     int avenum = 4500;
     if (weekSwitch){
@@ -109,8 +110,14 @@ void plotUK(BeamType beam, int weeks, bool weekSwitch){
     int normCount = 0;
     float normAverageTot = 0;
     float normAverageSpot = 0;
+
+    int yearConv;
+    TDatime date;
     for (int i=0; i<totQ.size(); i++){
-      TDatime date(2020,month.at(i),day.at(i),hour.at(i),minute.at(i),second.at(i));
+      
+      yearConv = year.at(i) + 1900;
+      date.Set(yearConv,month.at(i),day.at(i),hour.at(i),minute.at(i),second.at(i));
+      
       if (date.Convert() > 1594080000 && date.Convert() < 1594864800){
 	if (totQ.at(i) < 2000){
 	  normAverageTot += totQ.at(i);
@@ -130,7 +137,9 @@ void plotUK(BeamType beam, int weeks, bool weekSwitch){
 
     
     for (int i=0; i<totQ.size(); i++){
-      TDatime date(2020,month.at(i),day.at(i),hour.at(i),minute.at(i),second.at(i));
+      yearConv = year.at(i) + 1900;
+      date.Set(yearConv,month.at(i),day.at(i),hour.at(i),minute.at(i),second.at(i));
+      
       if (date.Convert() > time){
 	if (i == 0){
 	  count++;
