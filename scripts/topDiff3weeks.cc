@@ -105,13 +105,13 @@ void topDiff(int weeks, bool weekSwitch){
   float normBzy = 0;
   float normRatio = 0;
   float normBB = 0;
-  
-  for (int i=0; i<totQ.size(); i++){
-    TDatime date(2021,month.at(i),day.at(i),hour.at(i),minute.at(i),second.at(i));
-    if (year.at(i) == 120){
-      date.Set(2020,month.at(i),day.at(i),hour.at(i),minute.at(i),second.at(i));
-    }
 
+  int yearConv;
+  TDatime date;
+  for (int i=0; i<totQ.size(); i++){
+    yearConv = year.at(i) + 1900;
+    date.Set(yearConv,month.at(i),day.at(i),hour.at(i),minute.at(i),second.at(i));
+    
 
     if (date.Convert() > 1594080000 && date.Convert() < 1594864800){
       normBarrel += barrelQ.at(i)/totQ.at(i);
@@ -135,10 +135,8 @@ void topDiff(int weeks, bool weekSwitch){
   std::cout << normBarrel << " " << normBottom << " " << normBzy << " " << normRatio << " " << normBB << std::endl;
 
   for (int i=0; i<totQ.size(); i++){
-    TDatime date(2021,month.at(i),day.at(i),hour.at(i),minute.at(i),second.at(i));
-    if (year.at(i) == 120){
-      date.Set(2020,month.at(i),day.at(i),hour.at(i),minute.at(i),second.at(i));
-    }
+    yearConv = year.at(i) + 1900;
+    date.Set(yearConv,month.at(i),day.at(i),hour.at(i),minute.at(i),second.at(i));
 
     //    std::cout << date.GetYear() << " " << date.GetMonth() << " " << date.GetDay() << " " << date.GetHour() << " " << date.GetMinute() << std::endl;
     

@@ -116,13 +116,12 @@ void monPlot(BeamType beam, int weeks, bool weekSwitch){
     }
     
     int countMon = 0;
-    
-    for (int i=0; i<monQ.size(); i++){
-      TDatime date(2021,month.at(i),day.at(i),hour.at(i),minute.at(i),second.at(i));
-      if (year.at(i) == 120){
-	date.Set(2020,month.at(i),day.at(i),hour.at(i),minute.at(i),second.at(i));
-      }
 
+    TDatime date;
+    int yearConv;
+    for (int i=0; i<monQ.size(); i++){
+      yearConv = year.at(i) + 1900;
+      date.Set(yearConv,month.at(i),day.at(i),hour.at(i),minute.at(i),second.at(i));
 
       if (monQ.at(i) > 500 && monQ.at(i) < 4000 && date.Convert() > time){
 	if (i == 0){
