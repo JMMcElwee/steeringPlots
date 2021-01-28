@@ -37,6 +37,7 @@
 #include "TStyle.h"
 #include "TDatime.h"
 
+extern bool debug;
 
 void extract_data(std::ifstream &file,std::vector<int> &year,std::vector<int> &month,std::vector<int> &day,std::vector<int> &hour,std::vector<int> &minute,std::vector<int> &second,std::vector<float> &totQ, std::vector<float> &spotQ,std::vector<float> &monQ){
 
@@ -53,7 +54,14 @@ void extract_data(std::ifstream &file,std::vector<int> &year,std::vector<int> &m
       entries.push_back(entry);
     }
 
-    //    std::cout << entries.at(3) << " " << entries.at(4) << " " << entries.at(5) << " " << entries.at(6) << " " << entries.at(7) << std::endl;
+    // For debug purposes
+    TDatime tempDate(std::stoi(entries.at(2))+1900,std::stoi(entries.at(3)),
+				   std::stoi(entries.at(4)),std::stoi(entries.at(5)),
+				   std::stoi(entries.at(6)),std::stoi(entries.at(7)));
+    if (debug) {
+      std::cout << tempDate.AsSQLString() << std::endl;
+    }
+    
     year.push_back(std::stoi(entries.at(2)));
     month.push_back(std::stoi(entries.at(3)));
     day.push_back(std::stoi(entries.at(4)));
@@ -130,6 +138,15 @@ void extract_data_top(std::ifstream &file,std::vector<double> &totQ, std::vector
     while(getline(line_stream, entry, delim)){
       entries.push_back(entry);
     }
+
+    // For debug purposes
+    TDatime tempDate(std::stoi(entries.at(2))+1900,std::stoi(entries.at(3)),
+				   std::stoi(entries.at(4)),std::stoi(entries.at(5)),
+				   std::stoi(entries.at(6)),std::stoi(entries.at(7)));
+    if (debug) {
+      std::cout << tempDate.AsSQLString() << std::endl;
+    }
+    
     year.push_back(std::stoi(entries.at(2)));
     month.push_back(std::stoi(entries.at(3)));
     day.push_back(std::stoi(entries.at(4)));
@@ -167,5 +184,17 @@ void format_plots_top(TGraph *graph1,TLegend *leg,float min, float max, std::str
   leg->SetFillColor(0);
   leg->AddEntry(graph1, "B1", "p" );
   //leg->Draw();
+
+}
+
+
+void normalisation(std::vector<float> &meh, float normVal, std::vector<float> &error){
+
+  float prevError;
+  for (int i =0; i < meh.size(); i++){
+    prevError = meh[i];
+    meh[i] = meh[i]/normVal;
+    error[i] = error[i]*meh[i]/prevError;
+  }
 
 }

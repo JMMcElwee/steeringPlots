@@ -43,7 +43,8 @@
 
 #include "pltIndiv.h"
 
-
+// You shouldn't do this, but it's easier than anything else
+bool debug = false;
 
 int main(int argc, char *argv[]){
 
@@ -57,7 +58,7 @@ int main(int argc, char *argv[]){
   bool weekSwitch = false;
   int opt;
 
-  while ((opt = getopt(argc, argv, ":dctmo:w:l:")) != -1){
+  while ((opt = getopt(argc, argv, ":dctbmo:w:l:")) != -1){
     switch (opt)
       {
       case 'd':
@@ -82,6 +83,9 @@ int main(int argc, char *argv[]){
 	break;
       case 'l':
 	ldir = optarg;
+	break;
+      case 'b':
+	debug = true;
 	break;
       case ':':
 	printf("\033[1;31m[ERROR]\033[0m -%c requires an argument.\n",optopt);

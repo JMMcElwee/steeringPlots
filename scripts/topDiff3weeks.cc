@@ -43,6 +43,7 @@
 #include "createPlots.h"
 
 
+
 void topDiff(int weeks, bool weekSwitch){
 
   
@@ -129,7 +130,7 @@ void topDiff(int weeks, bool weekSwitch){
       normBB /= normCount;
       normCount=0;
       break;
-    }
+    }  
   }
   
   std::cout << normBarrel << " " << normBottom << " " << normBzy << " " << normRatio << " " << normBB << std::endl;
@@ -233,6 +234,13 @@ void topDiff(int weeks, bool weekSwitch){
 	bottomVec.push_back(averageBot/normBottom);
 	barrelVec.push_back(averageBar/normBarrel);
 	bzyVec.push_back(averageBzy/normBzy);
+	/*	totQVec.push_back(averageTot);
+	ratioQVec.push_back(averageRatio);
+	bbQVec.push_back(averageBB);
+	dateVec.push_back(date.Convert());
+	bottomVec.push_back(averageBot);
+	barrelVec.push_back(averageBar);
+	bzyVec.push_back(averageBzy);*/
 	averageTot = 0;
 	averageRatio = 0;
 	averageBB = 0;
@@ -284,9 +292,17 @@ void topDiff(int weeks, bool weekSwitch){
     tempNameBar = "Normalised Barrel Q ";
     tempNameBzy = "Normalised Barrel Q (z&y > 0) ";
     ending = "_" + std::to_string(weeks) + "weeks";
+
+    normalisation(ratioQVec,ratioQVec.front(),errorRatioVec);
+    normalisation(bbQVec,bbQVec.front(),errorBBVec);
+    normalisation(bottomVec,bottomVec.front(),errorBotVec);
+    normalisation(barrelVec,barrelVec.front(),errorBarVec);
+    normalisation(bzyVec,bzyVec.front(),errorBzyVec);
   }
   
-
+  float minimum = 0.995;
+  float maximum = 1.005;
+  
   
   TCanvas c1("c1","", 850, 500);
   c1.SetGrid();
@@ -297,52 +313,57 @@ void topDiff(int weeks, bool weekSwitch){
   c1.Print(printname1.c_str());
 
   std::cout << totQVec.back() << std::endl;
-  
+
+  if (!weekSwitch){minimum=0.995; maximum=1.025;}
   TCanvas c2("c2","", 850, 500);
   c2.SetGrid();
   TLegend *leg2 = new TLegend(0.75,0.8,0.9,0.9);
   TGraphErrors *ratioQ1 = new TGraphErrors(dateVec.size(), &dateVec[0], &ratioQVec[0], 0, &errorRatioVec[0]);
-  format_plots_top(ratioQ1, leg2, 0.985, 1.015,"%m-%d","bottomQ/barrelQ",tempNameRatio+"");
+  format_plots_top(ratioQ1, leg2, minimum, maximum,"%m-%d","bottomQ/barrelQ",tempNameRatio+"");
   std::string printname2 = "plots/" +  outname + ending + "_ratioQ_norm.png";
   c2.Print(printname2.c_str());
 
-  std::cout << ratioQVec.back() << std::endl;
+  std::cout << ratioQVec.front() << " " << ratioQVec.back() << std::endl;
 
+  if (!weekSwitch){minimum=0.995; maximum=1.03;}
   TCanvas c7("c7","", 850, 500);
   c7.SetGrid();
   TLegend *leg7 = new TLegend(0.75,0.8,0.9,0.9);
   TGraphErrors *bbQ1 = new TGraphErrors(dateVec.size(), &dateVec[0], &bbQVec[0], 0, &errorBBVec[0]);
-  format_plots_top(bbQ1, leg7, 0.985, 1.015,"%m-%d","bottomQ/barrelQ",tempNameBB+"");
+  format_plots_top(bbQ1, leg7, minimum, maximum,"%m-%d","bottomQ/barrelQ",tempNameBB+"");
   std::string printname7 = "plots/" + outname + ending + "_bbQ_norm.png";
   c7.Print(printname7.c_str());
 
   std::cout << bbQVec.back() << std::endl;
 
+  if (!weekSwitch){minimum=0.995; maximum=1.02;}
   TCanvas c10("c10","", 850, 500);
   c10.SetGrid();
   TLegend *leg10 = new TLegend(0.75,0.8,0.9,0.9);
   TGraphErrors *botQ1 = new TGraphErrors(dateVec.size(), &dateVec[0], &bottomVec[0], 0, &errorBotVec[0]);
-  format_plots_top(botQ1, leg10, 0.985, 1.015,"%m-%d","bottomQ/totQ",tempNameBot+"");
+  format_plots_top(botQ1, leg10, minimum, maximum,"%m-%d","bottomQ/totQ",tempNameBot+"");
   std::string printname10 = "plots/" + outname + ending + "_botQ_norm.png";
   c10.Print(printname10.c_str());
 
   std::cout << bottomVec.back() << std::endl;
-  
+
+  if (!weekSwitch){minimum=0.99; maximum=1.005;}
   TCanvas c11("c11","", 850, 500);
   c11.SetGrid();
   TLegend *leg11 = new TLegend(0.75,0.8,0.9,0.9);
   TGraphErrors *barQ1 = new TGraphErrors(dateVec.size(), &dateVec[0], &barrelVec[0], 0, &errorBarVec[0]);
-  format_plots_top(barQ1, leg11, 0.985, 1.015,"%m-%d","barrelQ/totQ",tempNameBar+"");
+  format_plots_top(barQ1, leg11, minimum, maximum,"%m-%d","barrelQ/totQ",tempNameBar+"");
   std::string printname11 = "plots/" + outname + ending + "_barQ_norm.png";
   c11.Print(printname11.c_str());
 
   std::cout << barrelVec.back() << std::endl;
-  
+
+  if (!weekSwitch){minimum=0.98; maximum=1.005;}
   TCanvas c12("c12","", 850, 500);
   c12.SetGrid();
   TLegend *leg12 = new TLegend(0.75,0.8,0.9,0.9);
   TGraphErrors *bzyQ1 = new TGraphErrors(dateVec.size(), &dateVec[0], &bzyVec[0], 0, &errorBzyVec[0]);
-  format_plots_top(bzyQ1, leg12, 0.985, 1.015,"%m-%d","bz0y0Q/totQ",tempNameBzy+"");
+  format_plots_top(bzyQ1, leg12, minimum, maximum,"%m-%d","bz0y0Q/totQ",tempNameBzy+"");
   std::string printname12 = "plots/" + outname + ending + "_bzyQ_norm.png";
   c12.Print(printname12.c_str());
 

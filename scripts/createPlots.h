@@ -13,4 +13,6 @@ void format_plots(TGraph *graph1,TGraph *graph2,TGraph *graph3,TGraph *graph4,TG
 void extract_data_top(std::ifstream &file,std::vector<double> &totQ, std::vector<double> &barrelQ,std::vector<int> &year,std::vector<int> &month,std::vector<int> &day,std::vector<int> &hour,std::vector<int> &minute,std::vector<int> &second,std::vector<double> &bottomQ,std::vector<double> &bz0y0Q);
 void format_plots_top(TGraph *graph1,TLegend *leg,float min, float max, std::string timeform, std::string yaxis, std::string title);
 
+void normalisation(std::vector<float> &meh, float normVal, std::vector<float> &error);
+
 #endif

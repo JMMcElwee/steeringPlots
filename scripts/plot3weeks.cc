@@ -93,7 +93,7 @@ void plotUK(BeamType beam, int weeks, bool weekSwitch){
     
     int avenum = 4500;
     if (weekSwitch){
-      avenum = weeks*400;
+      avenum = weeks*300;
     }
     std::vector<float> totDataPoints, totQVec, spotDataPoints, spotQVec, dateVec, errorSpotVec, errorTotVec;
     float averageTot = 0;
@@ -131,7 +131,7 @@ void plotUK(BeamType beam, int weeks, bool weekSwitch){
 	normCount=0;
 	break;
       }
-      
+     
     }
 
 
@@ -139,7 +139,12 @@ void plotUK(BeamType beam, int weeks, bool weekSwitch){
     for (int i=0; i<totQ.size(); i++){
       yearConv = year.at(i) + 1900;
       date.Set(yearConv,month.at(i),day.at(i),hour.at(i),minute.at(i),second.at(i));
-      
+
+      // DEBUG
+      if (debug) {
+	std::cout << date.AsSQLString() << std::endl;
+      }
+
       if (date.Convert() > time){
 	if (i == 0){
 	  count++;
@@ -223,7 +228,29 @@ void plotUK(BeamType beam, int weeks, bool weekSwitch){
     ending = "_" + std::to_string(weeks) + "weeks";
   }
 
-  
+
+  float minimum = 0.25;
+  float maximum = 1.4;
+
+  if (beamType == "dif"){
+    minimum = 0.9;
+    maximum = 1.1;
+  }
+
+  if (weekSwitch) {
+    normalisation(totQVecVec[0],totQVecVec[0][0],errorTotVecVec[0]);
+    normalisation(totQVecVec[1],totQVecVec[1][0],errorTotVecVec[1]);
+    normalisation(totQVecVec[2],totQVecVec[2][0],errorTotVecVec[2]);
+    normalisation(totQVecVec[3],totQVecVec[3][0],errorTotVecVec[3]);
+    normalisation(totQVecVec[4],totQVecVec[4][0],errorTotVecVec[4]);
+
+    normalisation(spotQVecVec[0],spotQVecVec[0][0],errorSpotVecVec[0]);
+    normalisation(spotQVecVec[1],spotQVecVec[1][0],errorSpotVecVec[1]);
+    normalisation(spotQVecVec[2],spotQVecVec[2][0],errorSpotVecVec[2]);
+    normalisation(spotQVecVec[3],spotQVecVec[3][0],errorSpotVecVec[3]);
+    normalisation(spotQVecVec[4],spotQVecVec[4][0],errorSpotVecVec[4]);
+  }
+    
   TCanvas c1("c1","");
   c1.SetGrid();
   TLegend *leg1 = new TLegend(0.13,0.85,0.9,0.9);
@@ -232,7 +259,7 @@ void plotUK(BeamType beam, int weeks, bool weekSwitch){
   TGraphErrors *totQ3 = new TGraphErrors(dateVecVec[2].size(), &dateVecVec[2][0], &totQVecVec[2][0], 0, &errorTotVecVec[2][0]);
   TGraphErrors *totQ4 = new TGraphErrors(dateVecVec[3].size(), &dateVecVec[3][0], &totQVecVec[3][0], 0, &errorTotVecVec[3][0]);
   TGraphErrors *totQ5 = new TGraphErrors(dateVecVec[4].size(), &dateVecVec[4][0], &totQVecVec[4][0], 0, &errorTotVecVec[4][0]);
-  format_plots(totQ1, totQ2, totQ3, totQ4, totQ5,leg1, 0.25, 1.4, "%m-%d","Tot Q (p.e)",tempNameTot);
+  format_plots(totQ1, totQ2, totQ3, totQ4, totQ5,leg1, minimum, maximum, "%m-%d","Tot Q (p.e)",tempNameTot);
   std::string printname1 = "plots/" + outname + ending + "_totQ_norm.png";
   c1.Print(printname1.c_str());
   
@@ -245,7 +272,7 @@ void plotUK(BeamType beam, int weeks, bool weekSwitch){
  TGraphErrors *spotQ3 = new TGraphErrors(dateVecVec[2].size(), &dateVecVec[2][0], &spotQVecVec[2][0], 0, &errorSpotVecVec[2][0]);
   TGraphErrors *spotQ4 = new TGraphErrors(dateVecVec[3].size(), &dateVecVec[3][0], &spotQVecVec[3][0], 0, &errorSpotVecVec[3][0]);
   TGraphErrors *spotQ5 = new TGraphErrors(dateVecVec[4].size(), &dateVecVec[4][0], &spotQVecVec[4][0], 0, &errorSpotVecVec[4][0]);
-  format_plots(spotQ1, spotQ2, spotQ3, spotQ4, spotQ5,leg2, 0.25, 1.4,"%m-%d","Spot Q (p.e)",tempNameSpot);
+  format_plots(spotQ1, spotQ2, spotQ3, spotQ4, spotQ5,leg2, minimum, maximum,"%m-%d","Spot Q (p.e)",tempNameSpot);
   std::string printname2 = "plots/" + outname + ending + "_spotQ_norm.png";
   c2.Print(printname2.c_str());
 

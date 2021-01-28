@@ -3,6 +3,7 @@
 
 #include <string>
 
+extern bool debug;
 
 enum BeamType{
   beam_diffuser,
