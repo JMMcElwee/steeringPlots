@@ -42,7 +42,7 @@
 
 #include "createPlots.h"
 
-
+float dataAv(std::vector<float> vector);
 
 void topDiff(int weeks, bool weekSwitch){
 
@@ -312,7 +312,7 @@ void topDiff(int weeks, bool weekSwitch){
   std::string printname1 = "plots/" + outname + ending + "_totQ_norm.png";
   c1.Print(printname1.c_str());
 
-  std::cout << totQVec.back() << std::endl;
+  std::cout << dataAv(totQVec) << std::endl;
 
   if (!weekSwitch){minimum=0.995; maximum=1.025;}
   TCanvas c2("c2","", 850, 500);
@@ -323,7 +323,7 @@ void topDiff(int weeks, bool weekSwitch){
   std::string printname2 = "plots/" +  outname + ending + "_ratioQ_norm.png";
   c2.Print(printname2.c_str());
 
-  std::cout << ratioQVec.front() << " " << ratioQVec.back() << std::endl;
+  std::cout << dataAv(ratioQVec) << std::endl;
 
   if (!weekSwitch){minimum=0.995; maximum=1.03;}
   TCanvas c7("c7","", 850, 500);
@@ -334,7 +334,7 @@ void topDiff(int weeks, bool weekSwitch){
   std::string printname7 = "plots/" + outname + ending + "_bbQ_norm.png";
   c7.Print(printname7.c_str());
 
-  std::cout << bbQVec.back() << std::endl;
+  std::cout << dataAv(bbQVec) << std::endl;
 
   if (!weekSwitch){minimum=0.995; maximum=1.02;}
   TCanvas c10("c10","", 850, 500);
@@ -345,7 +345,7 @@ void topDiff(int weeks, bool weekSwitch){
   std::string printname10 = "plots/" + outname + ending + "_botQ_norm.png";
   c10.Print(printname10.c_str());
 
-  std::cout << bottomVec.back() << std::endl;
+  std::cout << dataAv(bottomVec) << std::endl;
 
   if (!weekSwitch){minimum=0.99; maximum=1.005;}
   TCanvas c11("c11","", 850, 500);
@@ -356,7 +356,7 @@ void topDiff(int weeks, bool weekSwitch){
   std::string printname11 = "plots/" + outname + ending + "_barQ_norm.png";
   c11.Print(printname11.c_str());
 
-  std::cout << barrelVec.back() << std::endl;
+  std::cout << dataAv(barrelVec) << std::endl;
 
   if (!weekSwitch){minimum=0.98; maximum=1.005;}
   TCanvas c12("c12","", 850, 500);
@@ -367,8 +367,18 @@ void topDiff(int weeks, bool weekSwitch){
   std::string printname12 = "plots/" + outname + ending + "_bzyQ_norm.png";
   c12.Print(printname12.c_str());
 
-  std::cout << bzyVec.back() << std::endl;
+  std::cout << dataAv(bzyVec) << std::endl;
   
 }
 
 
+float dataAv(std::vector<float> vector){
+
+  int size = vector.size();
+  float sum = vector.at(size-7) + vector.at(size-6) + vector.at(size-5)
+    + vector.at(size-4) + vector.at(size-3) + vector.at(size-2) + vector.at(size-1);
+  sum /= 7;
+
+  return sum;
+  
+}
