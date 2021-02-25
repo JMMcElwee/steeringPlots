@@ -198,3 +198,20 @@ void normalisation(std::vector<float> &meh, float normVal, std::vector<float> &e
   }
 
 }
+
+
+float sdCalc(std::vector<float> vect){
+
+  float mean = std::accumulate(vect.begin(),vect.end(),0.0)/vect.size();
+
+  float sum = 0;
+  float diff;
+  for (int i=0;i<vect.size();i++){
+    diff = pow((vect.at(i) - mean),2);
+    sum += diff;
+  }
+
+  float sd = sqrt(sum/vect.size());
+
+  return sd;
+}

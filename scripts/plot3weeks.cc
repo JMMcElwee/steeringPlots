@@ -173,15 +173,11 @@ void plotUK(BeamType beam, int weeks, bool weekSwitch){
 	    spotDataPoints.push_back(spotQ.at(i));
 	  }
 	  
-	  float max = *std::max_element(totDataPoints.begin(),totDataPoints.end());
-	  float min = *std::min_element(totDataPoints.begin(),totDataPoints.end());
-	  errorTot = (max/normAverageTot - min/normAverageTot) / (2 * std::sqrt(count));
-	  //std::cout << max << " " << min << std::endl;
-	  float maxsp = *std::max_element(spotDataPoints.begin(),spotDataPoints.end());
-	  float minsp = *std::min_element(spotDataPoints.begin(),spotDataPoints.end());
-	  errorSpot = (maxsp/normAverageSpot - minsp/normAverageSpot) / (2 * std::sqrt(count));
-	  errorTotVec.push_back(errorTot);
-	  errorSpotVec.push_back(errorSpot);
+
+	  errorTot = sdCalc(totDataPoints)/std::sqrt(count);
+	  errorSpot = sdCalc(spotDataPoints)/std::sqrt(count);
+	  errorTotVec.push_back(errorTot/normAverageTot);
+	  errorSpotVec.push_back(errorSpot/normAverageSpot);
 	  totDataPoints.clear();
 	  spotDataPoints.clear();
 	  

@@ -15,4 +15,6 @@ void format_plots_top(TGraph *graph1,TLegend *leg,float min, float max, std::str
 
 void normalisation(std::vector<float> &meh, float normVal, std::vector<float> &error);
 
+float sdCalc(std::vector<float>);
+
 #endif

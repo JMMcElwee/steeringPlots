@@ -189,34 +189,20 @@ void topDiff(int weeks, bool weekSwitch){
 	bzyDataPoints.push_back(bz0y0Q.at(i)/totQ.at(i));
       
 
-	float max = *std::max_element(totDataPoints.begin(),totDataPoints.end());
-	float min = *std::min_element(totDataPoints.begin(),totDataPoints.end());
-	errorTot = (max - min) / (2 * std::sqrt(count));
-	//std::cout << max << " " << min << std::endl;
-	float maxsp = *std::max_element(ratioDataPoints.begin(),ratioDataPoints.end());
-	float minsp = *std::min_element(ratioDataPoints.begin(),ratioDataPoints.end());
-	errorRatio = (maxsp - minsp) / (2 * std::sqrt(count) * normRatio);
-	float maxbb = *std::max_element(bbDataPoints.begin(),bbDataPoints.end());
-	float minbb = *std::min_element(bbDataPoints.begin(),bbDataPoints.end());
-	errorBB = (maxbb - minbb) / (2 * std::sqrt(count) * normBB);
-	//      if (errorBB > 0.05) std::cout << errorBB << std::endl;
-	float maxba = *std::max_element(barrelDataPoints.begin(),barrelDataPoints.end());
-	float minba = *std::min_element(barrelDataPoints.begin(),barrelDataPoints.end());
-	errorBar = (maxba - minba) / (2 * std::sqrt(count) * normBarrel);
-	float maxbo = *std::max_element(bottomDataPoints.begin(),bottomDataPoints.end());
-	float minbo = *std::min_element(bottomDataPoints.begin(),bottomDataPoints.end());
-	errorBot = (maxbo - minbo) / (2 * std::sqrt(count) * normBottom);
-	float maxbzy = *std::max_element(bzyDataPoints.begin(),bzyDataPoints.end());
-	float minbzy = *std::min_element(bzyDataPoints.begin(),bzyDataPoints.end());
-	errorBzy = (maxbzy - minbzy) / (2 * std::sqrt(count) * normBzy);
+	errorTot = sdCalc(totDataPoints)/std::sqrt(count);
+	errorRatio = sdCalc(ratioDataPoints)/std::sqrt(count);
+	errorBB = sdCalc(bbDataPoints)/std::sqrt(count);
+	errorBar = sdCalc(barrelDataPoints)/std::sqrt(count);
+	errorBot = sdCalc(bottomDataPoints)/std::sqrt(count);
+	errorBzy = sdCalc(bzyDataPoints)/std::sqrt(count);
 
       
 	errorTotVec.push_back(errorTot);
-	errorRatioVec.push_back(errorRatio);
-	errorBBVec.push_back(errorBB);
-	errorBotVec.push_back(errorBot);
-	errorBarVec.push_back(errorBar);
-	errorBzyVec.push_back(errorBzy);
+	errorRatioVec.push_back(errorRatio/normRatio);
+	errorBBVec.push_back(errorBB/normBB);
+	errorBotVec.push_back(errorBot/normBottom);
+	errorBarVec.push_back(errorBar/normBarrel);
+	errorBzyVec.push_back(errorBzy/normBzy);
 	totDataPoints.clear();
 	ratioDataPoints.clear();
 	bbDataPoints.clear();
